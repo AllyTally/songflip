@@ -105,6 +105,7 @@ class MainWindow(QWidget):
         self.replacebutton.clicked.connect(self.replacesong)
         self.editsongbutton.clicked.connect(self.editsong)
         self.genbutton.clicked.connect(self.genmusic)
+        self.extbutton.clicked.connect(self.extractmusic)
         self.editfilebutton.clicked.connect(self.editfilemeta)
         self.lastsong.clicked.connect(self.indexback)
         self.playsong.clicked.connect(self.indexplay)

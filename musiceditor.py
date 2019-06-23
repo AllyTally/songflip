@@ -2,6 +2,7 @@ import os
 import math
 import time
 import ntpath
+import argparse
 
 metaver = [1,0]
 
@@ -13,8 +14,8 @@ songnames = [
     "Passion For Exploring",
     "Pause",
     "Presenting VVVVVV",
-    "Predestined Fate",
     "Plenary",
+    "Predestined Fate",
     "ecroF evitisoP",
     "Popular Potpourri",
     "Pipe Dream",
@@ -92,7 +93,10 @@ class Song():
         self.notes = notes
     def save(self,filename):
         """Save the song to a file."""
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        try:
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+        except FileNotFoundError:
+            filename = "./" + filename
         with open(filename + ".ogg", "wb") as outfile:
             outfile.write(self.data)
     def generate_meta(self):
@@ -136,6 +140,7 @@ class MusicFile():
     def extract(self,filenames=files,path=None):
         """This extracts all songs to a folder. This is the same as looping through all songs and running `Song.save()`."""
         if path != None:
+            path = path + "/"
             if not os.path.exists(path):
                 os.makedirs(path, exist_ok=True)
         for x,i in enumerate(self.songs):
@@ -221,3 +226,61 @@ def load_music(filename):
             metabuildinglength += i
         return MusicFile(songdata,timestamp,splitmeta[0].decode(),splitmeta[1].decode(),splitmeta[2].decode(),True,metadata,exmajorver,exminorver)
     return MusicFile(songdata,0,"","","",False,None,0,0)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Edits VVVVVV music files.')
+    parser.add_argument('-i', '--input', metavar='input', type=str, help='the music file to edit. empty for a new file')
+    parser.add_argument('-r', '--replace', metavar=('song','filename'), nargs=2, type=str, help='replace a song with a file')
+    parser.add_argument('-t', '--time', action='store_true', help='get the time the file was created')
+    parser.add_argument('-n', '--name', metavar='name', nargs='?', type=str, help='edit the files name metadata, missing argument prints it', default=False)
+    parser.add_argument('-a', '--artist', metavar='artist', nargs='?', type=str, help='edit the files artist metadata, missing argument prints it', default=False)
+    parser.add_argument('-no', '--notes', metavar='notes', nargs='?', type=str, help='edit the files notes metadata, missing argument prints it', default=False)
+    parser.add_argument('-sn', '--songname', metavar=('song','name'), nargs='+', type=str, help='edit a songs name metadata, missing second argument prints it')
+    parser.add_argument('-x', '--extract', metavar=('song','filename'), nargs=2, type=str, help='extract a song')
+    parser.add_argument('-X', '--extractall', metavar='path', type=str, help='extract all songs')
+    parser.add_argument('-ss', '--songsize', metavar='song', type=int, help='get a songs length')
+    parser.add_argument('-sf', '--songfile', metavar=('song','filename'), nargs='+', type=str, help='edit a songs filename metadata, missing second argument prints it')
+    parser.add_argument('-sno', '--songnotes', metavar=('song','notes'), nargs='+', type=str, help='edit a songs notes metadata, missing second argument prints it')
+    parser.add_argument('-o', '--output', metavar='output', type=str, help='what to save the file as')
+    args = parser.parse_args()
+    musicfile = load_music(args.input)
+    if args.name != False:
+        if args.name != None:
+            musicfile.album = args.name
+        else:
+            print(musicfile.album)
+    if args.artist != False:
+        if args.artist != None:
+            musicfile.artist = args.artist
+        else:
+            print(musicfile.artist)
+    if args.notes != False:
+        if args.notes != None:
+            musicfile.notes = args.notes
+        else:
+            print(musicfile.notes)
+    if args.time:
+        print(musicfile.timestamp)
+    if args.extract:
+        musicfile.songs[int(args.extract[0])].save(filename=args.extract[1])
+    if args.extractall:
+        musicfile.extract(path=args.extractall)
+    if args.songname != None:
+        if len(args.songname) != 1:
+            musicfile.songs[int(args.songname[0])].name = args.songname[1]
+        else:
+            print(musicfile.songs[int(args.songname[0])].name)
+    if args.songfile != None:
+        if len(args.songfile) != 1:
+            musicfile.songs[int(args.songfile[0])].filename = args.songfile[1]
+        else:
+            print(musicfile.songs[int(args.songfile[0])].filename)
+    if args.songnotes != None:
+        if len(args.songnotes) != 1:
+            musicfile.songs[int(args.songnotes[0])].notes = args.songnotes[1]
+        else:
+            print(musicfile.songs[int(args.songnotes[0])].notes)
+    if args.songsize != None:
+        print(len(musicfile.songs[args.songsize].data))
+    if args.output != None:
+        musicfile.save(args.output)
