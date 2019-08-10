@@ -9,14 +9,31 @@ def install(package):
     """Install a package using pip"""
     subprocess.call([sys.executable, "-m", "pip", "install", package])
 
+cantinstall = """The modules required for SongFlip could not be installed automatically.
+
+If you're on Windows, please reinstall Python and enable pip during installation.
+
+If you're on Linux, please run "pip3 install pygame" and "pip3 install PySide2".
+If pip3 doesn't exist, please install it through your package manager, which is most likely something like "apt install python3-pip".
+"""
+
+try:
+    mdfe = ModuleNotFoundError
+except NameError:
+    mdfe = ImportError
+
 try:
     with contextlib.redirect_stdout(None):
         import pygame
-except (ModuleNotFoundError, ImportError):
+except (mdfe, ImportError):
     print("Pygame not installed. Installing...")
     install("pygame")
-    with contextlib.redirect_stdout(None):
-        import pygame
+    try:
+        with contextlib.redirect_stdout(None):
+            import pygame
+    except (mdfe, ImportError):
+        print(cantinstall)
+        sys.exit()
 
 try:
     from PySide2.QtWidgets import (QApplication, QLabel, QPushButton,
@@ -25,17 +42,21 @@ try:
                                    QPlainTextEdit)
     from PySide2.QtCore import Slot, Qt
     import PySide2.QtGui as QtGui
-except (ModuleNotFoundError, ImportError):
+except (mdfe, ImportError):
     print("PySide2 not installed. Installing...")
     install("PySide2")
-    from PySide2.QtWidgets import (QApplication, QLabel, QPushButton,
-                                   QGridLayout, QWidget, QComboBox,
-                                   QLineEdit, QFileDialog, QDialog,
-                                   QPlainTextEdit)
-    from PySide2.QtCore import Slot, Qt
-    import PySide2.QtGui as QtGui
+    try:
+        from PySide2.QtWidgets import (QApplication, QLabel, QPushButton,
+                                       QGridLayout, QWidget, QComboBox,
+                                       QLineEdit, QFileDialog, QDialog,
+                                       QPlainTextEdit)
+        from PySide2.QtCore import Slot, Qt
+        import PySide2.QtGui as QtGui
+    except (mdfe, ImportError):
+        print(cantinstall)
+        sys.exit()
 
-ver = "1.0.0"
+ver = "1.0.2"
 print("SoundFlip " + ver)
 fileloaded = None
 playingsong = False
