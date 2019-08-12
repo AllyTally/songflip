@@ -56,7 +56,7 @@ except (mdfe, ImportError):
         print(cantinstall)
         sys.exit()
 
-ver = "1.2"
+ver = "1.3"
 print("SoundFlip " + ver)
 fileloaded = None
 playingsong = False

@@ -193,6 +193,11 @@ def load_music(filename):
         return MusicFile(songdata,"","","","",False,"empty",metaver[0],metaver[1])
     with open(filename, "rb") as f:
         a = f.read()
+    return load_music_from_bytes(a)
+
+def load_music_from_bytes(a):
+    """This function creates a MusicFile object from raw bytes."""
+    songdata = []
     lengthlist = []
     for i in range(0,16):
         lengthlist.append(int.from_bytes(a[52+(i*60):56+(i*60)],'little'))
